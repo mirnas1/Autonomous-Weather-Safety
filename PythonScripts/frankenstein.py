@@ -48,9 +48,8 @@ except ImportError:
 VIEW_WIDTH = 1920 // 2
 VIEW_HEIGHT = 1080 // 2
 VIEW_FOV = 90
-MODEL_PATH = '/home/boyang/carla/ameer-stuff/train15/weights/best.pt'
+MODEL_PATH = 'yourlocaldirectory/best.pt'
 MODEL = YOLO(MODEL_PATH)
-#CURRENT_WEATHER = 'not available'
 
 #part 1 (end)
 
@@ -163,12 +162,13 @@ class SimInfo(object):
         camera_transform = carla.Transform(carla.Location(x=-5.5, z=2.8), carla.Rotation(pitch=-15))
         self.camera = self.world.spawn_actor(self.camera_blueprint(), camera_transform, attach_to=self.car)
         weak_self = weakref.ref(self)
-        #makes it so i can save images to disk every 120 frames / 4 seconds
+        
         def camera_callback(image):
             self = weak_self()
             self.set_image(weak_self, image)
+            #makes it images are only captured every 60 frames aka every 2 seconds
             if image.frame % 60 == 0:
-                #image.save_to_disk('/home/boyang/carla/ameer-stuff/sim-images/wet-carla/%.6d.png' % image.frame)
+                #image.save_to_disk('your desired file path' % image.frame)
                 array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
                 array = np.reshape(array, (image.height, image.width, 4))
                 array = array[:, :, :3]  # Remove alpha channel
@@ -189,7 +189,7 @@ class SimInfo(object):
                             self.max_speed = self.speed_limit
                     elif classifaction == 1:
                         self.weather = 'rain'
-                        #using constant of recommended PSI for tesla model 3 (current vehicle in simulation, obviously the car using this alg would update its recommended PSI accordingly)
+                        #using constant of recommended PSI for tesla model 3 (current vehicle in simulation, the car using this alg would update its recommended PSI accordingly)
                         self.max_speed = 9 * math.sqrt(44) - 1
                     elif classifaction == 2:
                         self.weather = 'snow'
